@@ -3,100 +3,96 @@
 import { useState } from 'react';
 
 interface ControlsProps {
-  onColorChange: (color: string) => void;
-  onIterationsChange: (iterations: number) => void;
-  currentIterations: number;
+  maxIterations: number;
+  setMaxIterations: (value: number) => void;
   currentColor: string;
+  setCurrentColor: (value: string) => void;
+  onReset: () => void;
 }
 
-const colorPalettes = [
-  { name: 'Grayscale', value: 'grayscale' },
-  { name: 'Rainbow', value: 'rainbow' },
-  { name: 'Fire', value: 'fire' },
-  { name: 'Ocean', value: 'ocean' },
-  { name: 'Forest', value: 'forest' },
+const colorOptions = [
+  { value: 'grayscale', label: 'Grayscale' },
+  { value: 'rainbow', label: 'Rainbow' },
+  { value: 'fire', label: 'Fire' },
+  { value: 'ocean', label: 'Ocean' },
+  { value: 'forest', label: 'Forest' },
+  { value: 'plasma', label: 'Plasma' },
+  { value: 'aurora', label: 'Aurora' },
 ];
 
 export default function Controls({
-  onColorChange,
-  onIterationsChange,
-  currentIterations,
+  maxIterations,
+  setMaxIterations,
   currentColor,
+  setCurrentColor,
+  onReset,
 }: ControlsProps) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCurrentColor(e.target.value);
+  };
+
+  const handleIterationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMaxIterations(Number(e.target.value));
+  };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Color Palette
-          </label>
-          <select
-            value={currentColor}
-            onChange={(e) => onColorChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {colorPalettes.map((palette) => (
-              <option key={palette.value} value={palette.value}>
-                {palette.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Max Iterations
-          </label>
-          <input
-            type="range"
-            min="50"
-            max="500"
-            step="50"
-            value={currentIterations}
-            onChange={(e) => onIterationsChange(Number(e.target.value))}
-            className="w-full"
-          />
-          <div className="text-sm text-gray-600 mt-1">{currentIterations}</div>
-        </div>
-
+    <div className="absolute top-4 left-4 z-10 bg-gray-800/90 backdrop-blur-sm p-3 rounded-lg shadow-lg">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-medium text-gray-200">Settings</h3>
         <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-gray-400 hover:text-gray-200 transition-colors text-xs"
         >
-          {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+          {isExpanded ? '▼' : '▶'}
         </button>
       </div>
 
-      {showAdvanced && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Advanced Settings</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Zoom Sensitivity
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                defaultValue="5"
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Render Quality
-              </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
+      {isExpanded && (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-300">
+              Color Palette
+            </label>
+            <select
+              value={currentColor}
+              onChange={handleColorChange}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {colorOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-300">
+              Max Iterations: {maxIterations}
+            </label>
+            <input
+              type="range"
+              min="50"
+              max="1000"
+              step="50"
+              value={maxIterations}
+              onChange={handleIterationsChange}
+              className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-gray-400">
+              <span>50</span>
+              <span>1000</span>
             </div>
           </div>
+
+          <button
+            onClick={onReset}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1 px-2 rounded-lg transition-colors"
+          >
+            Reset View
+          </button>
         </div>
       )}
     </div>
